@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --sidebar-width: 260px;
+}
+/* Simple loader spinner */
+.loader {
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.course-details-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 2rem;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+.course-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.course-tag {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.course-description {
+  margin: 1rem 0;
+  font-size: 1.1rem;
+  color: #444;
+}
+.course-meta {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+.roadmap-section {
+  margin-top: 2rem;
+  background: #f0f4ff;
+  border-radius: 8px;
+  padding: 1rem;
+}
+.roadmap-section h2 {
+  margin-bottom: 1rem;
+}
+.roadmap-section ol {
+  padding-left: 1.5rem;
+}
+.modules-section {
+  margin-top: 2rem;
+}
+.modules-section h2 {
+  margin-bottom: 1rem;
+}
+.module-card {
+  background: #f7f7f7;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.loader {
+  text-align: center;
+  margin-top: 3rem;
+  font-size: 1.2rem;
+  color: #007bff;
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+
