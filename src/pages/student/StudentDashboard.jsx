@@ -1,3 +1,4 @@
+// src/pages/StudentDashboard.jsx
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import banner1 from '../../Images/Top-Banner1.avif';
@@ -7,39 +8,35 @@ import aiBanner from '../../Images/AI-ThumNail.webp';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
-
- 
   const [currentBanner, setCurrentBanner] = useState(0);
   const [fade, setFade] = useState(true);
 
   const banners = [
-  {
-    image: banner1,
-    title: "Welcome Back!",
-    subtitle: "Continue learning, practicing, and growing your skills.",
-  },
-  {
-    image: banner2,
-    title: "Master New Skills",
-    subtitle: "Explore top-rated courses and sharpen your expertise.",
-  },
-  {
-    image: banner3,
-    title: "Your Learning Journey",
-    subtitle: "Track progress and stay motivated every step of the way.",
-  },
-];
-
+    {
+      image: banner1,
+      title: "Welcome Back!",
+      subtitle: "Continue learning, practicing, and growing your skills.",
+    },
+    {
+      image: banner2,
+      title: "Master New Skills",
+      subtitle: "Explore top-rated courses and sharpen your expertise.",
+    },
+    {
+      image: banner3,
+      title: "Your Learning Journey",
+      subtitle: "Track progress and stay motivated every step of the way.",
+    },
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false); // Start fade-out
+      setFade(false);
       setTimeout(() => {
         setCurrentBanner((prev) => (prev + 1) % banners.length);
-        setFade(true); // Fade-in new image
-      }, 500); // Duration of fade-out
-    }, 3000); // Change every 3 seconds
-
+        setFade(true);
+      }, 500);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -60,22 +57,23 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-16 px-4 py-6 bg-gradient-to-b from-blue-50 via-white to-blue-100 min-h-screen">
-      {/* Hero Banner with Animation */}
-    <div className="relative rounded-xl overflow-hidden shadow-lg w-full aspect-[20/9]">
-  <img
-    src={banners[currentBanner].image}
-    alt="Learning Banner"
-    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${fade ? 'opacity-100' : 'opacity-0'}`}
-  />
-  <div className="absolute inset-0 flex flex-col justify-center items-start p-8 text-white">
-    <h1 className="text-4xl font-bold mb-2">{banners[currentBanner].title}</h1>
-    <p className="text-lg">{banners[currentBanner].subtitle}</p>
-  </div>
-</div>
-
-
-
-
+      
+      {/* Hero Banner with Gradient Text */}
+      <div className="relative rounded-xl overflow-hidden shadow-lg w-full aspect-[20/9]">
+        <img
+          src={banners[currentBanner].image}
+          alt="Learning Banner"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${fade ? 'opacity-100' : 'opacity-0'}`}
+        />
+        <div className="absolute inset-0 flex flex-col justify-center items-start p-8">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent drop-shadow-lg">
+            {banners[currentBanner].title}
+          </h1>
+          <p className="text-lg text-slate-100 drop-shadow-md">
+            {banners[currentBanner].subtitle}
+          </p>
+        </div>
+      </div>
 
       {/* Quick Access */}
       <section className="bg-white p-8 rounded-xl shadow-md">

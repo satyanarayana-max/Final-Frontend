@@ -5,7 +5,7 @@ import { authService } from '../../services/authService';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import loginIllustration from '../../Images/student-login-illustration.avif'; // Add your image here
+import loginIllustration from '../../Images/Logo.jpg'; // Add your image here
 
 export default function StudentLogin() {
   const {

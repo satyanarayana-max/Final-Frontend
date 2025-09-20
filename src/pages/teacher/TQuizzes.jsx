@@ -11,28 +11,20 @@ export default function TQuizzes() {
   const [loading, setLoading] = useState(true)
   const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm()
 
-  // Load quizzes and courses
   const load = async () => {
     try {
       setLoading(true)
-
       const quizzes = await teacherService.listQuizzes()
-      console.log('📘 Quizzes loaded:', quizzes)
-
-      // Format quizzes to include readable published status
       const formattedQuizzes = quizzes.map(q => ({
         ...q,
-        publishedText: q.published ? 'Yes' : 'No',
+        publishedText: q.published ? '✅ Published' : '❌ Unpublished',
         courseText: q.courseTitle || '—'
       }))
       setRows(formattedQuizzes)
 
       const courseData = await teacherService.listCourses()
-      console.log('📚 Courses loaded:', courseData)
       setCourses(courseData)
-
     } catch (err) {
-      console.error('❌ Error loading data:', err)
       toast.error('Failed to load data')
     } finally {
       setLoading(false)
@@ -41,31 +33,23 @@ export default function TQuizzes() {
 
   useEffect(() => { load() }, [])
 
-  // Create quiz
   const onCreate = async (data) => {
-  try {
-    const payload = {
-      title: data.title,
-      courseId: parseInt(data.courseId),
-      published: false,
-      questions: data.questionsJson ? JSON.parse(data.questionsJson) : []
+    try {
+      const payload = {
+        title: data.title,
+        courseId: parseInt(data.courseId),
+        published: false,
+        questions: data.questionsJson ? JSON.parse(data.questionsJson) : []
+      }
+      await teacherService.createQuiz(payload)
+      toast.success('Quiz created')
+      reset()
+      load()
+    } catch (err) {
+      toast.error('Create failed')
     }
-    console.log('Sending payload:', payload)
-
-    const res = await teacherService.createQuiz(payload)
-    console.log('✅ Quiz created:', res)
-
-    toast.success('Quiz created')
-    reset()
-    load()
-  } catch (err) {
-    console.error(err.response?.data || err)
-    toast.error('Create failed')
   }
-}
 
-
-  // Update quiz
   const onUpdate = async (row) => {
     try {
       const newTitle = prompt('Enter new title', row.title)
@@ -81,12 +65,10 @@ export default function TQuizzes() {
       toast.success('Quiz updated')
       load()
     } catch (err) {
-      console.error(err.response?.data || err)
       toast.error('Update failed')
     }
   }
 
-  // Delete quiz
   const onDelete = async (row) => {
     if (!confirm('Delete quiz?')) return
     try {
@@ -94,60 +76,84 @@ export default function TQuizzes() {
       toast.success('Deleted')
       load()
     } catch (err) {
-      console.error(err)
       toast.error('Delete failed')
     }
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Quizzes</h2>
+    <div className="p-6 space-y-6">
+      <div className="bg-white shadow-xl rounded-xl p-6 transition-all duration-300 hover:shadow-2xl">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">📝 Manage Quizzes</h2>
+        <p className="text-gray-600 mb-6">Create, update, and delete quizzes for your courses.</p>
 
-      {/* Create form */}
-      <form onSubmit={handleSubmit(onCreate)} className="bg-white p-4 rounded shadow space-y-2 max-w-lg">
-        <div className="font-medium">Add Quiz</div>
-        <input
-          {...register('title', { required: true })}
-          placeholder="Title"
-          className="w-full border rounded px-3 py-2"
-        />
+        {/* Create form */}
+        <form onSubmit={handleSubmit(onCreate)} className="space-y-4">
+          <div className="grid gap-4">
+            <input
+              {...register('title', { required: true })}
+              placeholder="Quiz Title"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
 
-        {/* Course dropdown */}
-        <select {...register('courseId', { required: true })} className="w-full border rounded px-3 py-2">
-          <option value="">Select Course</option>
-          {courses.map(course => (
-            <option key={course.id} value={course.id}>{course.title}</option>
-          ))}
-        </select>
+            <select
+              {...register('courseId', { required: true })}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select Course</option>
+              {courses.map(course => (
+                <option key={course.id} value={course.id}>{course.title}</option>
+              ))}
+            </select>
 
-        {/* Questions JSON */}
-        <textarea
-          {...register('questionsJson', { required: true })}
-          placeholder='[{"question":"...", "optionA":"...", "optionB":"...", "optionC":"...", "optionD":"...", "correctOption":"A"}]'
-          className="w-full border rounded px-3 py-2"
-        />
+            <textarea
+              {...register('questionsJson', { required: true })}
+              placeholder='[{"question":"...", "optionA":"...", "optionB":"...", "optionC":"...", "optionD":"...", "correctOption":"A"}]'
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-        <button disabled={isSubmitting} className="bg-blue-600 text-white rounded px-4 py-2">
-          {isSubmitting ? 'Saving…' : 'Add Quiz'}
-        </button>
-      </form>
+          <button
+            disabled={isSubmitting}
+            className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ${
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {isSubmitting ? 'Saving…' : 'Add Quiz'}
+          </button>
+        </form>
+      </div>
 
       {/* Quizzes table */}
-      {loading ? <Loader /> :
-        <Table
-          columns={[
-            { header: 'ID', accessor: 'id' },
-            { header: 'Title', accessor: 'title' },
-            { header: 'Course', accessor: 'courseText' },
-            { header: 'Published', accessor: 'publishedText' },
-          ]}
-          data={rows}
-          actions={[
-            { label: 'Update', onClick: (row) => onUpdate(row) },
-            { label: 'Delete', variant: 'danger', onClick: (row) => onDelete(row) }
-          ]}
-        />
-      }
+      <div className="bg-white shadow-lg rounded-xl p-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">📋 Quiz List</h3>
+        {loading ? (
+          <Loader />
+        ) : (
+          <Table
+            columns={[
+              { header: 'ID', accessor: 'id' },
+              { header: 'Title', accessor: 'title' },
+              { header: 'Course', accessor: 'courseText' },
+              { header: 'Status', accessor: 'publishedText' },
+            ]}
+            data={rows}
+            actions={[
+              {
+                label: 'Update',
+                onClick: (row) => onUpdate(row),
+                className: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition px-3 py-1 rounded-full text-sm font-medium'
+              },
+              {
+                label: 'Delete',
+                variant: 'danger',
+                onClick: (row) => onDelete(row),
+                className: 'bg-red-100 text-red-800 hover:bg-red-200 transition px-3 py-1 rounded-full text-sm font-medium'
+              }
+            ]}
+            rowClassName="hover:bg-gray-50 transition duration-200"
+          />
+        )}
+      </div>
     </div>
   )
 }

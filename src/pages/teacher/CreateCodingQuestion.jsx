@@ -3,11 +3,10 @@ import { teacherService } from "../../services/teacherService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-
-
 export default function CreateCodingQuestion() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [topic, setTopic] = useState(""); // ✅ Manual topic input
   const [inputFormat, setInputFormat] = useState("");
   const [outputFormat, setOutputFormat] = useState("");
   const [difficulty, setDifficulty] = useState("");
@@ -26,7 +25,7 @@ export default function CreateCodingQuestion() {
     const payload = {
       title: title.trim(),
       description: description.trim(),
-      topic: "Math", // You can make this dynamic later
+      topic: topic.trim(),
       difficulty,
       sampleInput: inputFormat.trim(),
       sampleOutput: outputFormat.trim(),
@@ -36,6 +35,7 @@ export default function CreateCodingQuestion() {
     if (
       !payload.title ||
       !payload.description ||
+      !payload.topic ||
       !payload.sampleInput ||
       !payload.sampleOutput ||
       !payload.difficulty ||
@@ -45,32 +45,21 @@ export default function CreateCodingQuestion() {
       return;
     }
 
-    console.log("Submitting payload:", payload); // ✅ Debug log
-
     try {
       await teacherService.createCodingQuestion(payload);
-     toast.success("Coding question created!");
-     navigate("/questions");
-
+      toast.success("Coding question created!");
+      navigate("/questions");
 
       // Reset form
       setTitle("");
       setDescription("");
+      setTopic("");
       setInputFormat("");
       setOutputFormat("");
       setDifficulty("");
       setTestCases([{ input: "", output: "" }]);
     } catch (err) {
       console.error("❌ Error creating coding question:", err);
-      if (err.response) {
-        console.error("🔍 Response data:", err.response.data);
-        console.error("📦 Status code:", err.response.status);
-        console.error("📨 Headers:", err.response.headers);
-      } else if (err.request) {
-        console.error("⚠️ No response received:", err.request);
-      } else {
-        console.error("⚙️ Request setup error:", err.message);
-      }
       toast.error("Failed to create coding question");
     }
   };
@@ -80,18 +69,18 @@ export default function CreateCodingQuestion() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Create Coding Question</h2>
+    <div className="p-6 max-w-2xl mx-auto space-y-6">
+      <h2 className="text-3xl font-bold text-blue-700 text-center">Create Coding Question</h2>
 
       <input
-        className="w-full p-2 border rounded mb-3"
+        className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
 
       <textarea
-        className="w-full p-2 border rounded mb-3"
+        className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         rows={3}
         placeholder="Description"
         value={description}
@@ -99,36 +88,38 @@ export default function CreateCodingQuestion() {
       />
 
       <input
-        className="w-full p-2 border rounded mb-3"
+        className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Topic (e.g., Math, Strings, Arrays)"
+        value={topic}
+        onChange={(e) => setTopic(e.target.value)}
+      />
+
+      <input
+        className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder="Input Format"
         value={inputFormat}
         onChange={(e) => setInputFormat(e.target.value)}
       />
 
       <input
-        className="w-full p-2 border rounded mb-3"
+        className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         placeholder="Output Format"
         value={outputFormat}
         onChange={(e) => setOutputFormat(e.target.value)}
       />
 
-      <label className="block font-medium mb-1">Difficulty</label>
-      <select
-        className="w-full p-2 border rounded mb-4"
+      <input
+        className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Difficulty (Easy, Medium, Hard)"
         value={difficulty}
         onChange={(e) => setDifficulty(e.target.value)}
-      >
-        <option value="">Select difficulty</option>
-        <option value="Easy">Easy</option>
-        <option value="Medium">Medium</option>
-        <option value="Hard">Hard</option>
-      </select>
+      />
 
-      <h3 className="font-semibold mb-2">Test Cases</h3>
+      <h3 className="text-lg font-semibold text-gray-700">Test Cases</h3>
       {testCases.map((tc, idx) => (
-        <div key={idx} className="mb-2">
+        <div key={idx} className="mb-4 space-y-2">
           <input
-            className="w-full p-2 border rounded mb-1"
+            className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder={`Input ${idx + 1}`}
             value={tc.input}
             onChange={(e) => {
@@ -138,7 +129,7 @@ export default function CreateCodingQuestion() {
             }}
           />
           <input
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder={`Output ${idx + 1}`}
             value={tc.output}
             onChange={(e) => {
@@ -152,7 +143,7 @@ export default function CreateCodingQuestion() {
 
       <button
         onClick={addTestCase}
-        className="mt-2 mb-4 bg-gray-200 px-3 py-1 rounded"
+        className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded transition"
       >
         + Add Test Case
       </button>
@@ -160,9 +151,10 @@ export default function CreateCodingQuestion() {
       {/* Preview Card */}
       {(title || description || inputFormat || outputFormat || testCases.length > 0) && (
         <div className="mt-6 p-4 border rounded bg-gray-50 shadow-sm">
-          <h3 className="text-lg font-semibold mb-2">Preview</h3>
+          <h3 className="text-lg font-semibold mb-2 text-blue-700">Preview</h3>
           <p><strong>Title:</strong> {title || "—"}</p>
           <p><strong>Description:</strong> {description || "—"}</p>
+          <p><strong>Topic:</strong> {topic || "—"}</p>
           <p><strong>Input Format:</strong> {inputFormat || "—"}</p>
           <p><strong>Output Format:</strong> {outputFormat || "—"}</p>
           <p><strong>Difficulty:</strong> {difficulty || "—"}</p>
@@ -182,7 +174,7 @@ export default function CreateCodingQuestion() {
 
       <button
         onClick={handleSubmit}
-        className="mt-6 bg-blue-600 text-white px-4 py-2 rounded"
+        className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded transition"
       >
         Submit Question
       </button>

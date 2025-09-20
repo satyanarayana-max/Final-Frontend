@@ -33,7 +33,7 @@ export default function TeacherHome() {
   ];
 
   return (
-    <Layout sidebar={<Sidebar items={items} role="TEACHER" />}>
+    <Layout topNav={<TopNav items={items} role="TEACHER" />}>
       <Routes>
         <Route index element={<TeacherDashboard />} />
         <Route path="students" element={<TStudents />} />
@@ -48,7 +48,7 @@ export default function TeacherHome() {
         <Route path="practice" element={<AddPracticeQuestion />} />
         <Route path="practice/add-coding" element={<CreateCodingQuestion />} />
         <Route path="practice/add-aptitude" element={<CreateAptitudeQuestion />} />
-        <Route path="questions" element={<CodingQuestionList />} />
+        <Route path="/questions" element={<CodingQuestionList />} />
         <Route path="aptitudequestions" element={<AptitudeQuestionListBySection />} />
 
 

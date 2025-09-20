@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
-import registerIllustration from '../../Images/student-login-illustration.avif'; // Replace with your image
+import registerIllustration from '../../Images/Logo.jpg'; // Replace with your image
 
 export default function StudentRegister() {
   const {

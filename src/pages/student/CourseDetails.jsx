@@ -3,6 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import { studentService } from "../../services/studentService";
+import { marked } from "marked";
+import createDOMPurify from "dompurify";
+
+const DOMPurify = typeof window !== "undefined" ? createDOMPurify(window) : { sanitize: (v) => v };
+marked.setOptions({ gfm: true, breaks: true });
 
 export default function CourseDetails() {
   const { courseId } = useParams();
@@ -15,13 +20,21 @@ export default function CourseDetails() {
 
   useEffect(() => {
     if (courseId) loadCourse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
+
+  const sanitizeHtml = (md) => {
+    if (!md) return "";
+    const html = marked(md);
+    return DOMPurify.sanitize(html);
+  };
 
   const loadCourse = async () => {
     try {
       setLoading(true);
       const data = await studentService.getCourseOutline(courseId);
       setCourse(data);
+      console.log("Fetched course outline:", data);
 
       const enrolledRes = await studentService.isEnrolled(courseId);
       setIsEnrolled(enrolledRes.enrolled);
@@ -107,9 +120,15 @@ export default function CourseDetails() {
           <h2 className="text-2xl font-semibold mb-4">What you'll learn</h2>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
             {course.learningOutcomes.map((point, idx) => (
-              <li key={idx} className="flex items-start space-x-2 bg-gray-50 p-2 rounded">
+              <li
+                key={idx}
+                className="flex items-start space-x-2 bg-gray-50 p-2 rounded"
+              >
                 <span className="text-green-600">✔</span>
-                <span>{point}</span>
+                <div
+                  className="text-sm"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(point) }}
+                />
               </li>
             ))}
           </ul>
@@ -145,14 +164,46 @@ export default function CourseDetails() {
 
               {isExpanded && (
                 <div className="p-4 bg-gray-50 text-gray-700">
-                  {lesson.description && <p className="mb-2">{lesson.description}</p>}
+                  {lesson.description && (
+                    <div
+                      className="mb-2"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(lesson.description) }}
+                    />
+                  )}
                   <ul className="list-disc list-inside">
-                    {lesson.videos.map((video) => (
-                      <li key={video.id} className="mb-1">
-                        {video.title}{" "}
-                        {video.preview && <span className="text-blue-500">(Preview)</span>}
-                      </li>
-                    ))}
+                    {lesson.videos.map((video) => {
+                      const isYouTube = video.type === "youtube";
+                      const isFile = video.type === "file" && video.url;
+
+                      return (
+                        <li key={video.id} className="mb-4">
+                          <p className="font-semibold">{video.title}</p>
+                          {isYouTube ? (
+                            <a
+                              href={video.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 underline"
+                            >
+                              Watch on YouTube
+                            </a>
+                          ) : isFile ? (
+                            <video
+                              src={video.url.startsWith("http") ? video.url : `http://localhost:8080${video.url}`}
+                              controls
+                              className="w-full max-w-md rounded"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          ) : (
+                            <span className="text-gray-500">Video not available</span>
+                          )}
+                          {video.preview && (
+                            <span className="text-blue-500 ml-2">(Preview)</span>
+                          )}
+                        </li>
+                      );
+                    })}
                     {lesson.videos.length === 0 && <li>No videos added yet.</li>}
                   </ul>
                 </div>
